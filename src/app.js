@@ -8,6 +8,10 @@ import userRouter from './routes/user.js'
 import postRouter from './routes/posts.js'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import http from 'http'
+import initializeSocket from './utils/socket.js'
+import MessageRouter from './routes/message.js'
+
 const app = express()
 
 // ✅ Global middlewares first
@@ -20,16 +24,22 @@ app.use(cors({
 }));
 
 // ✅ Then routes
+app.use('/',MessageRouter)
 app.use('/', authrouter)
 app.use('/', requestRouter)
 app.use('/',profileRouter)
 app.use('/',userRouter)
 app.use('/',postRouter)
 
+const server=http.createServer(app)
+initializeSocket(server)
+
+
+
 connectDB()
   .then(() => {
     console.log("Connection Successfull")
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`Server listening at port ${process.env.PORT}`)
     })
   })

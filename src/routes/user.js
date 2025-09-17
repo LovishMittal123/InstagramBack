@@ -76,8 +76,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
 
     const allIds = new Set([...followingIds, ...followersIds])
 
-    // ❌ If you don't want your own posts, uncomment this line
-    // allIds.delete(loggedInUserId.toString())
+    allIds.delete(loggedInUserId.toString())
 
     // Fetch posts from these users
     const posts = await Post.find({
@@ -121,5 +120,23 @@ userRouter.get("/user/suggestions", userAuth, async (req, res) => {
     res.status(500).json({ message: "Something went wrong" })
   }
 })
+// 📌 Get single user by ID
+userRouter.get("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select(
+      "firstName lastName photoUrl about skills age gender"
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
+
 
 export default userRouter
