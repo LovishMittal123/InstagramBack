@@ -22,21 +22,20 @@ app.use(express.json())
 app.use(cookieParser())
 
 const allowedOrigins = [
-  'http://localhost:5173',                    
-  'https://instagram-front-25v33km3x-lovish-mittals-projects.vercel.app'  
-]
+  'http://localhost:5173',  // local dev
+  'https://instagram-front-25v33km3x-lovish-mittals-projects.vercel.app' // deployed frontend
+];
 
 app.use(cors({
-  origin: function(origin, callback){
-    // allow requests with no origin (like Postman or server-to-server)
-    if(!origin) return callback(null, true)
-    if(allowedOrigins.indexOf(origin) === -1){
-      return callback(new Error(`CORS policy blocked: ${origin}`), false)
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // for Postman/server-to-server
+    if (!allowedOrigins.includes(origin)) {
+      return callback(new Error(`CORS blocked: ${origin}`), false);
     }
-    return callback(null, true)
+    return callback(null, true);
   },
-  credentials: true
-}))
+  credentials: true  // IMPORTANT: allows cookies/auth
+}));
 
 // ✅ Routes
 app.use('/', MessageRouter)
