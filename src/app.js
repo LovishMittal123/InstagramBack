@@ -23,7 +23,7 @@ app.use(cookieParser())
 
 const allowedOrigins = [
   'http://localhost:5173',  // local dev
-  'https://instagram-front-25v33km3x-lovish-mittals-projects.vercel.app' // deployed frontend
+  'https://instagram-front-78zq.vercel.app' // deployed frontend
 ];
 
 app.use(cors({
