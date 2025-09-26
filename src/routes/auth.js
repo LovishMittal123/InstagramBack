@@ -4,6 +4,10 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import userAuth from '../utils/userAuth.js'
 const authrouter=express.Router()
+authrouter.get('/test', (req, res) => {
+  res.json({ message: 'Backend is alive' });
+});
+
 authrouter.post('/signup',async(req,res)=>{
     try{
         const{firstName,lastName,age,gender,photoUrl,email,password,about}=req.body
