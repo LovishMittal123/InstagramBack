@@ -23,7 +23,7 @@ app.use(cookieParser())
 
 const allowedOrigins = [
   'http://localhost:5173',                    
-  'https://instagram-front-7b18.vercel.app'  
+  'https://instagram-front-25v33km3x-lovish-mittals-projects.vercel.app'  
 ]
 
 app.use(cors({
