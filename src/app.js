@@ -23,8 +23,10 @@ app.use(cookieParser())
 
 const allowedOrigins = [
   'http://localhost:5173',  // local dev
-  'https://instagram-front-78zq.vercel.app' // deployed frontend
+  'https://instagram-front-78zq.vercel.app', // old deployment
+  'https://instagram-front-78zq-2a40yj5v5-lovish-mittals-projects.vercel.app' // your current vercel deployment
 ];
+
 
 app.use(cors({
   origin: function(origin, callback) {
