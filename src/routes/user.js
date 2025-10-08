@@ -9,6 +9,14 @@ const userRouter = express.Router()
 const selectedFields = "firstName lastName photoUrl about skills age gender"
 
 // 📌 Get all pending follow requests received
+userRouter.get('/allUsers',userAuth,async(req,res)=>{
+  try {
+    const users=await User.find({},"firstName lastName photoUrl")
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
 userRouter.get('/user/request/received', userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user
@@ -131,12 +139,18 @@ userRouter.get("/user/:id", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(user);
+    // ✅ Fetch all posts created by this user
+    const posts = await Post.find({ createdBy: req.params.id })
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "firstName lastName imageUrl");
+
+    res.json({ user, posts });
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
+
 
 
 export default userRouter
