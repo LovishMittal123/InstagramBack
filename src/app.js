@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import connectDB from './connection/connectDB.js';
 import authRouter from './routes/auth.js';
@@ -9,11 +8,8 @@ import userRouter from './routes/user.js';
 import postRouter from './routes/posts.js';
 import MessageRouter from './routes/message.js';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import http from 'http';
 import initializeSocket from './utils/socket.js';
-
-dotenv.config();
 
 const app = express();
 
@@ -23,13 +19,19 @@ app.use(cookieParser());
 
 // ✅ CORS setup for localhost + Vercel frontend
 const allowedOrigins = [
-  'http://localhost:5173',
-  'https://instagram-front-geuu.vercel.app'
+  'http://localhost:5173', // local dev
+  'https://instagram-front-geuu.vercel.app' // deployed frontend
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true // allow cookies
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // for Postman or server-to-server
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true
 }));
 
 // ✅ Routes
