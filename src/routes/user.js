@@ -122,7 +122,7 @@ userRouter.get("/user/suggestions", userAuth, async (req, res) => {
       _id: { $nin: Array.from(excludedIds) }
     }).select(selectedFields)
 
-    res.json(suggestions)
+    res.json({data:suggestions})
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Something went wrong" })
