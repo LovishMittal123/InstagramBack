@@ -10,9 +10,9 @@ import MessageRouter from './routes/message.js';
 import cors from 'cors';
 import http from 'http';
 import initializeSocket from './utils/socket.js';
-
+import dotenv from 'dotenv';
 const app = express();
-
+dotenv.config()
 // ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
