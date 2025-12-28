@@ -23,7 +23,7 @@ app.use(cookieParser());
 // ✅ CORS setup
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://instagram-front-plum.vercel.app'
+  'https://instagram-front-geuu.vercel.app/'
 ];
 
 app.use(cors({
@@ -47,7 +47,7 @@ app.use('/', postRouter);
 
 // ✅ Root redirect
 app.get("/", (req, res) => {
-  res.redirect("https://instagram-front-plum.vercel.app/");
+  res.redirect("https://instagram-front-geuu.vercel.app/");
 });
 
 // ✅ Create HTTP server for Socket.IO
