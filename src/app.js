@@ -11,21 +11,24 @@ import cors from 'cors';
 import http from 'http';
 import initializeSocket from './utils/socket.js';
 import dotenv from 'dotenv';
+
+dotenv.config();
+
 const app = express();
-dotenv.config()
+
 // ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ CORS setup for localhost + Vercel frontend
+// ✅ CORS setup
 const allowedOrigins = [
-  'http://localhost:5173', // local dev
-  'https://instagram-front-plum.vercel.app/'
+  'http://localhost:5173',
+  'https://instagram-front-plum.vercel.app'
 ];
 
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // for Postman or server-to-server
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -42,16 +45,21 @@ app.use('/', profileRouter);
 app.use('/', userRouter);
 app.use('/', postRouter);
 
-// ✅ Create server for socket.io
+// ✅ Root redirect
+app.get("/", (req, res) => {
+  res.redirect("https://instagram-front-plum.vercel.app/");
+});
+
+// ✅ Create HTTP server for Socket.IO
 const server = http.createServer(app);
 initializeSocket(server);
 
-// ✅ Connect to DB and start server
+// ✅ Start server ONLY ONCE
 const PORT = process.env.PORT || 5000;
+
 connectDB()
   .then(() => {
     console.log('Database connected successfully');
-    
     server.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
@@ -59,12 +67,3 @@ connectDB()
   .catch(err => {
     console.error('Cannot connect to database:', err);
   });
-  
-
-  app.get("/", (req, res) => {
-  res.redirect("https://instagram-front-plum.vercel.app/");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}!`);
-});
