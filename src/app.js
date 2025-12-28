@@ -47,10 +47,11 @@ const server = http.createServer(app);
 initializeSocket(server);
 
 // ✅ Connect to DB and start server
+const PORT = process.env.PORT || 5000;
 connectDB()
   .then(() => {
     console.log('Database connected successfully');
-    const PORT = process.env.PORT || 5000;
+    
     server.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
@@ -64,6 +65,6 @@ connectDB()
   res.redirect("https://instagram-front-plum.vercel.app/");
 });
 
-app.listen(port, () => {
-  console.log(`Server started on port ${port}!`);
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}!`);
 });
