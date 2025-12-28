@@ -20,7 +20,7 @@ app.use(cookieParser());
 // ✅ CORS setup for localhost + Vercel frontend
 const allowedOrigins = [
   'http://localhost:5173', // local dev
-  'https://instagram-front-geuu.vercel.app' // deployed frontend
+  'https://instagram-front-plum.vercel.app/'
 ];
 
 app.use(cors({
@@ -58,3 +58,12 @@ connectDB()
   .catch(err => {
     console.error('Cannot connect to database:', err);
   });
+  
+
+  app.get("/", (req, res) => {
+  res.redirect("https://instagram-front-plum.vercel.app/");
+});
+
+app.listen(port, () => {
+  console.log(`Server started on port ${port}!`);
+});
