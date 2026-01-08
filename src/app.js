@@ -23,7 +23,7 @@ app.use(cookieParser());
 // ✅ CORS setup
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://instagram-front-geuu.vercel.app/'
+  'https://instagram-front-geuu.vercel.app'
 ];
 
 app.use(cors({
@@ -36,6 +36,12 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// Ensure the credentials header is present for browsers using `withCredentials`.
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 // ✅ Routes
 app.use('/', MessageRouter);
