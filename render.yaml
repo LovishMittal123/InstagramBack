@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: backendinsta
+    env: docker
+    dockerfilePath: Dockerfile
+    branch: main
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CONNECTION_KEY
+        value: "<SET_ON_RENDER>"
+      - key: COOKIE_SECRET
+        value: "<SET_ON_RENDER>"
