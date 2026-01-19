@@ -1,102 +1,105 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import multer from "multer";
 import User from "../models/user.js";
 import userAuth from "../utils/userAuth.js";
+import upload from "../utils/multer.js";
 
 const authrouter = express.Router();
 
-/* =======================
-   MULTER CONFIG
-======================= */
-const storage = multer.memoryStorage();
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-});
-
-/* =======================
+/* ===========================
    SIGNUP
-======================= */
-authrouter.post("/signup", upload.single("photo"), async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      age,
-      gender,
-      email,
-      password,
-      about,
-      photoUrl,
-    } = req.body;
+=========================== */
+authrouter.post(
+  "/signup",
+  upload.single("photo"),
+  async (req, res) => {
+    try {
+      const {
+        firstName,
+        lastName,
+        age,
+        gender,
+        email,
+        password,
+        about,
+      } = req.body;
 
-    // basic validation
-    if (!firstName || !email || !password) {
-      return res.status(400).json({ message: "Required fields missing" });
+      if (!firstName || !email || !password) {
+        return res.status(400).json({ message: "Required fields missing" });
+      }
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      /* ===========================
+         HANDLE IMAGE
+      =========================== */
+      let photoUrl = "";
+
+      if (req.file) {
+        photoUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+          "base64"
+        )}`;
+      }
+
+      const user = new User({
+        firstName,
+        lastName,
+        age,
+        gender,
+        email,
+        password: hashedPassword,
+        about,
+        photoUrl,
+      });
+
+      const savedUser = await user.save();
+
+      const token = jwt.sign(
+        { _id: savedUser._id },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: "30d" }
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
+
+      res.status(201).json({
+        _id: savedUser._id,
+        firstName: savedUser.firstName,
+        lastName: savedUser.lastName,
+        email: savedUser.email,
+        photoUrl: savedUser.photoUrl,
+        age: savedUser.age,
+        gender: savedUser.gender,
+        about: savedUser.about,
+      });
+    } catch (err) {
+      console.error("Signup error:", err);
+      res.status(500).json({ error: err.message });
     }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    /* =======================
-       PHOTO HANDLING
-    ======================= */
-    let finalPhotoUrl = photoUrl || "";
-
-    if (req.file) {
-      // convert image to base64 (TEMP solution)
-      finalPhotoUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-        "base64"
-      )}`;
-    }
-
-    const user = new User({
-      firstName,
-      lastName,
-      age,
-      gender,
-      email,
-      password: hashedPassword,
-      about,
-      photoUrl: finalPhotoUrl,
-    });
-
-    const savedUser = await user.save();
-
-    const token = jwt.sign(
-      { _id: savedUser._id },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "30d" }
-    );
-
-    // cross-domain cookie (Vercel → Render)
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-
-    res.status(201).json({ data: savedUser });
-  } catch (err) {
-    console.error("Signup error:", err);
-    res.status(500).json({ message: err.message });
   }
-});
+);
 
-/* =======================
+/* ===========================
    LOGIN
-======================= */
+=========================== */
 authrouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
@@ -121,15 +124,26 @@ authrouter.post("/login", async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    res.json(existingUser);
+    res.json({
+      _id: existingUser._id,
+      firstName: existingUser.firstName,
+      lastName: existingUser.lastName,
+      email: existingUser.email,
+      photoUrl: existingUser.photoUrl,
+      age: existingUser.age,
+      gender: existingUser.gender,
+      about: existingUser.about,
+      skills: existingUser.skills,
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Login error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* =======================
+/* ===========================
    LOGOUT
-======================= */
+=========================== */
 authrouter.post("/logout", userAuth, async (req, res) => {
   try {
     res.clearCookie("token", {
@@ -140,7 +154,8 @@ authrouter.post("/logout", userAuth, async (req, res) => {
 
     res.json({ message: "Logged out successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Logout error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
